@@ -37,7 +37,7 @@ export class Timeout {
     const timeoutController = new AbortController();
     const flowTask = task instanceof FlowTask ? task : new FlowTask(task);
 
-    let cleanupParentAbort: () => void;
+    let cleanupParentAbort!: () => void;
     const parentAbort = new Promise<T>((_, reject) => {
       const abort = (): void => {
         reject(new FlowAbortedError());

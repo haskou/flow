@@ -93,6 +93,19 @@ describe(Semaphore.name, () => {
 
   it('rejects acquire when the signal is already aborted', async () => {
     const semaphore = new Semaphore(1);
+    const controller = new AbortController();
+
+    controller.abort();
+
+    await expect(semaphore.acquire(controller.signal)).rejects.toThrow(
+      FlowAbortedError,
+    );
+
+    expect(semaphore.getAvailablePermits()).toBe(1);
+  });
+
+  it('rejects queued acquire when the signal is already aborted', async () => {
+    const semaphore = new Semaphore(1);
     const permit = await semaphore.acquire();
     const controller = new AbortController();
 

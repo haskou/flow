@@ -56,14 +56,14 @@ export class Semaphore {
   public acquire(
     signal: AbortSignal = new AbortController().signal,
   ): Promise<SemaphorePermit> {
+    if (signal.aborted) {
+      return Promise.reject(new FlowAbortedError());
+    }
+
     const permit = this.tryAcquire();
 
     if (permit) {
       return Promise.resolve(permit);
-    }
-
-    if (signal.aborted) {
-      return Promise.reject(new FlowAbortedError());
     }
 
     return new Promise((resolve, reject) => {
