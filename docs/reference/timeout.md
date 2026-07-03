@@ -43,6 +43,8 @@ await new Timeout(Duration.fromSeconds(3)).run((signal) =>
 ## Notes
 
 - Timeout aborts the task signal before rejecting with `TimeoutError`.
+- The internal timer is cleared when the task finishes before the timeout.
+- Parent abort signals are propagated to the running task and reject with `FlowAbortedError`.
 - Number inputs are interpreted as milliseconds.
 
 ## Related

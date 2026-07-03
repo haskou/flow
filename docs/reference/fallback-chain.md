@@ -12,7 +12,11 @@ Use `FallbackChain` when a value may be available from memory, cache, database, 
 ## Import
 
 ```typescript
-import { FallbackAttempt, FallbackChain } from '@haskou/flow';
+import {
+  FallbackAttempt,
+  FallbackChain,
+  FallbackChainOptions,
+} from '@haskou/flow';
 ```
 
 ## Signature
@@ -24,7 +28,7 @@ class FallbackChain<T>
 ## Constructor
 
 ```typescript
-constructor()
+constructor(options = FallbackChainOptions.default())
 ```
 
 ## Throws
@@ -32,14 +36,14 @@ constructor()
 This class can throw:
 
 - `FallbackChainExhaustedError`
-
-Errors thrown by individual attempts are swallowed so the next fallback source can run.
+- any error thrown by an attempt, unless `catchErrors` is enabled
 
 ## Methods
 
 | Method | Description |
 | --- | --- |
 | `try(attempt)` | Adds an attempt to the chain and returns the chain. |
+| `onError(handler)` | Registers a handler called when an attempt throws. |
 | `run()` | Runs attempts in order and returns the first non-nullish value. |
 
 ## Example
@@ -55,14 +59,24 @@ const user = await new FallbackChain<User>()
 
 ## Availability rules
 
-An attempt is considered unavailable when it:
+By default, an attempt is considered unavailable only when it:
 
 - returns `null`;
-- returns `undefined`;
-- returns another falsy value such as `false`, `0`, or an empty string;
-- throws any error.
+- returns `undefined`.
 
-The chain stops at the first truthy value.
+Values such as `false`, `0`, and an empty string are valid results.
+
+Attempt errors are propagated by default. Enable `FallbackChainOptions.catchingErrors()` for best-effort fallback behavior.
+
+```typescript
+const user = await new FallbackChain<User>(
+  FallbackChainOptions.catchingErrors(),
+)
+  .onError((error) => logger.warn(error))
+  .try(() => getUserFromRedis(id))
+  .try(() => getUserFromDatabase(id))
+  .run();
+```
 
 ## `FallbackAttempt`
 
@@ -91,9 +105,8 @@ constructor(
 ## Notes
 
 - Empty chains throw `FallbackChainExhaustedError`.
-- Attempt errors are intentionally swallowed by `FallbackChain`.
-- Falsy values are treated as unavailable values.
-- Use explicit logging inside attempts if swallowed errors need observability.
+- Attempt errors are not swallowed unless catch mode is enabled.
+- Use `onError()` when catch mode needs observability.
 
 ## Related
 

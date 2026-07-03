@@ -105,7 +105,7 @@ jobs:
 
           package_name="$(node -p "require('./package.json').name")"
           current_version="$(node -p "require('./package.json').version")"
-          published_version="$(npm view "$package_name" version)"
+          published_version="$(npm view "$package_name" version 2>/dev/null || echo "0.0.0")"
           branch_name="${HEAD_BRANCH}"
           release_marker="for #${PR_NUMBER}"
 

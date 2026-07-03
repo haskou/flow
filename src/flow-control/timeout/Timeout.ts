@@ -1,5 +1,6 @@
 import { Duration } from '@haskou/value-objects';
 
+import { FlowAbortedError } from '../../errors/FlowAbortedError';
 import { InvalidTimeoutDurationError } from '../../errors/InvalidTimeoutDurationError';
 import { TimeoutError } from '../../errors/TimeoutError';
 import { FlowTask } from '../flow/FlowTask';
@@ -28,19 +29,43 @@ export class Timeout {
     task: FlowTask<T> | ((signal: AbortSignal) => Promise<T> | T),
     signal: AbortSignal = new AbortController().signal,
   ): Promise<T> {
+    if (signal.aborted) {
+      return Promise.reject(new FlowAbortedError());
+    }
+
     const controller = new AbortController();
+    const timeoutController = new AbortController();
     const flowTask = task instanceof FlowTask ? task : new FlowTask(task);
-    const timeout = new Promise<T>((_, reject) => {
-      this.duration.toTimerDelay().setTimeout(() => {
+
+    let cleanupParentAbort: () => void;
+    const parentAbort = new Promise<T>((_, reject) => {
+      const abort = (): void => {
+        reject(new FlowAbortedError());
         controller.abort();
-        reject(new TimeoutError());
+        timeoutController.abort();
+      };
+
+      cleanupParentAbort = (): void => {
+        signal.removeEventListener('abort', abort);
+      };
+
+      signal.addEventListener('abort', abort, { once: true });
+    });
+    const timeout = this.duration
+      .toTimerDelay()
+      .wait(timeoutController.signal)
+      .then(() => {
+        controller.abort();
+        throw new TimeoutError();
       });
-    });
 
-    signal.addEventListener('abort', () => {
-      controller.abort();
+    return Promise.race([
+      flowTask.run(controller.signal),
+      timeout,
+      parentAbort,
+    ]).finally(() => {
+      timeoutController.abort();
+      cleanupParentAbort();
     });
-
-    return Promise.race([flowTask.run(controller.signal), timeout]);
   }
 }

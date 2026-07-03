@@ -1,4 +1,12 @@
-import { Semaphore, SemaphoreReleasedError } from '../../src';
+import {
+  FlowAbortedError,
+  InvalidSemaphorePermitsError,
+  Semaphore,
+  SemaphoreCapacity,
+  SemaphorePermit,
+  SemaphoreReleasedError,
+  SemaphoreWaiter,
+} from '../../src';
 
 describe(Semaphore.name, () => {
   it('limits concurrent work', async () => {
@@ -20,6 +28,22 @@ describe(Semaphore.name, () => {
     await Promise.all([first, second]);
 
     expect(order).toEqual(['first:start', 'first:end', 'second']);
+  });
+
+  it('accepts a semaphore capacity value object', () => {
+    const semaphore = new Semaphore(new SemaphoreCapacity(2));
+
+    expect(semaphore.getCapacity()).toBe(2);
+  });
+
+  it('rejects invalid permit counts', () => {
+    expect(() => new Semaphore(0)).toThrow(InvalidSemaphorePermitsError);
+  });
+
+  it('runs tasks through the run alias', async () => {
+    const semaphore = new Semaphore(1);
+
+    await expect(semaphore.run(() => 'value')).resolves.toBe('value');
   });
 
   it('rejects double permit release', async () => {
@@ -49,5 +73,45 @@ describe(Semaphore.name, () => {
     secondPermit.release();
 
     expect(semaphore.getAvailablePermits()).toBe(1);
+  });
+
+  it('can abort a queued acquire', async () => {
+    const semaphore = new Semaphore(1);
+    const permit = await semaphore.acquire();
+    const controller = new AbortController();
+    const queued = semaphore.acquire(controller.signal);
+
+    expect(semaphore.getWaitingCount()).toBe(1);
+
+    controller.abort();
+
+    await expect(queued).rejects.toThrow(FlowAbortedError);
+    expect(semaphore.getWaitingCount()).toBe(0);
+
+    permit.release();
+  });
+
+  it('rejects acquire when the signal is already aborted', async () => {
+    const semaphore = new Semaphore(1);
+    const permit = await semaphore.acquire();
+    const controller = new AbortController();
+
+    controller.abort();
+
+    await expect(semaphore.acquire(controller.signal)).rejects.toThrow(
+      FlowAbortedError,
+    );
+
+    permit.release();
+  });
+
+  it('can grant a waiter that is not watching an abort signal', () => {
+    const permit = new SemaphorePermit(() => undefined);
+    const resolve = jest.fn();
+    const waiter = new SemaphoreWaiter(resolve, jest.fn());
+
+    waiter.grant(permit);
+
+    expect(resolve).toHaveBeenCalledWith(permit);
   });
 });

@@ -1,4 +1,8 @@
-import { FallbackChain, FallbackChainExhaustedError } from '../../src';
+import {
+  FallbackChain,
+  FallbackChainExhaustedError,
+  FallbackChainOptions,
+} from '../../src';
 
 describe(FallbackChain.name, () => {
   it('returns the first available value', async () => {
@@ -12,22 +16,19 @@ describe(FallbackChain.name, () => {
     expect(value).toBe('memory');
   });
 
-  it('tries the next attempt after null, undefined, or thrown failures', async () => {
+  it('tries the next attempt after null or undefined', async () => {
     const fallbackChain = new FallbackChain<string>();
 
     const value = await fallbackChain
       .try(() => null)
       .try(() => undefined)
-      .try(() => {
-        throw new Error('redis unavailable');
-      })
       .try(async () => 'database')
       .run();
 
     expect(value).toBe('database');
   });
 
-  it('treats falsy values as unavailable', async () => {
+  it('treats falsy values as resolved values', async () => {
     const fallbackChain = new FallbackChain<string | number | false>();
 
     const value = await fallbackChain
@@ -37,7 +38,47 @@ describe(FallbackChain.name, () => {
       .try(() => 'remote')
       .run();
 
-    expect(value).toBe('remote');
+    expect(value).toBe(0);
+  });
+
+  it('propagates attempt errors by default', async () => {
+    const fallbackChain = new FallbackChain<string>();
+
+    await expect(
+      fallbackChain
+        .try(() => {
+          throw new Error('redis unavailable');
+        })
+        .try(() => 'database')
+        .run(),
+    ).rejects.toThrow('redis unavailable');
+  });
+
+  it('can catch errors explicitly and notify handlers', async () => {
+    const errors: unknown[] = [];
+    const fallbackChain = new FallbackChain<string>(
+      FallbackChainOptions.catchingErrors(),
+    ).onError((error) => {
+      errors.push(error);
+    });
+
+    const value = await fallbackChain
+      .try(() => {
+        throw new Error('redis unavailable');
+      })
+      .try(() => 'database')
+      .run();
+
+    expect(value).toBe('database');
+    expect(errors).toHaveLength(1);
+  });
+
+  it('accepts explicit options with the default resolver', async () => {
+    const fallbackChain = new FallbackChain<number>(
+      new FallbackChainOptions<number>(),
+    );
+
+    await expect(fallbackChain.try(() => 0).run()).resolves.toBe(0);
   });
 
   it('throws when every attempt fails', async () => {
@@ -46,9 +87,7 @@ describe(FallbackChain.name, () => {
     await expect(
       fallbackChain
         .try(() => null)
-        .try(() => {
-          throw new Error('remote unavailable');
-        })
+        .try(() => undefined)
         .run(),
     ).rejects.toThrow(FallbackChainExhaustedError);
   });

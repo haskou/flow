@@ -7,7 +7,7 @@ description: Throttler API reference.
 
 Runs tasks one at a time while keeping at least the configured interval between starts.
 
-Use `Throttler` when every submitted task should run, but not too frequently.
+Use `Throttler` when every submitted task should run, but starts should be spaced over time. It does not drop intermediate calls.
 
 ## Import
 

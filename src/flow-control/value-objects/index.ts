@@ -21,3 +21,4 @@ export * from './SemaphorePermits';
 export * from './ThrottleInterval';
 export * from './TimeoutDuration';
 export * from './TimerDelay';
+export * from './TimerDelayWaiter';

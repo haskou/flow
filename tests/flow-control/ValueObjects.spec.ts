@@ -12,6 +12,7 @@ import {
   Concurrency,
   Debouncer,
   DebounceDelay,
+  FlowAbortedError,
   FlowCancelledError,
   InvalidFlowCountError,
   InvalidPositiveDurationValueError,
@@ -136,6 +137,16 @@ describe('flow-control value objects', () => {
     expect(
       reservation.getDelay().getDuration().isEqual(Duration.fromMilliseconds(0)),
     ).toBe(true);
+  });
+
+  it('can abort timer delays', async () => {
+    const controller = new AbortController();
+    const delay = new RetryDelay(20).toTimerDelay();
+    const promise = delay.wait(controller.signal);
+
+    controller.abort();
+
+    await expect(promise).rejects.toThrow(FlowAbortedError);
   });
 
   it('normalizes invalid positive durations', () => {

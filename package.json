@@ -1,7 +1,7 @@
 {
   "name": "@haskou/flow",
   "version": "0.1.0",
-  "description": "Small TypeScript flow-control primitives for queues, semaphores, schedulers, rate limits, debouncing, throttling, and circuit breakers.",
+  "description": "TypeScript classes for controlling how async tasks and promises run.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {

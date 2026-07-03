@@ -41,6 +41,10 @@ await promise;
 - `FlowAbortedError`
 - any error thrown by the task
 
+## Notes
+
+- Abort listeners are removed when the task resolves or rejects.
+
 ## Related
 
 - [Flow](/reference/flow)

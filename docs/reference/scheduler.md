@@ -50,7 +50,7 @@ This class can throw:
 
 | Method | Description |
 | --- | --- |
-| `start()` | Starts periodic execution. Calling it again while running is a no-op. |
+| `start()` | Starts periodic execution. Idempotent: calling it again while running is a no-op. |
 | `stop()` | Stops periodic execution. Calling it while stopped is a no-op. |
 | `isRunning()` | Returns whether the interval timer is active. |
 | `runOnce()` | Attempts one non-overlapping execution. Returns `false` when another run is active. |
@@ -143,6 +143,7 @@ Enum-style value object backed by `@haskou/value-objects`.
 ## Notes
 
 - `start()` uses `setInterval` through `TimerDelay`; primitive milliseconds stay at that timer boundary.
+- `start()` is intentionally idempotent. Use `assertStopped()` when a caller needs to enforce stopped state before continuing.
 - Number inputs are interpreted as milliseconds.
 - Task errors are swallowed only when policy is `SchedulerErrorPolicy.SWALLOW`.
 - `runOnce()` is useful for tests and manual job triggers.

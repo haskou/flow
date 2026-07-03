@@ -13,8 +13,8 @@ export class Retrier {
     this.delay = options.getDelay();
   }
 
-  private waitBeforeNextAttempt(): Promise<void> {
-    return this.delay.toTimerDelay().wait();
+  private waitBeforeNextAttempt(signal: AbortSignal): Promise<void> {
+    return this.delay.toTimerDelay().wait(signal);
   }
 
   public async run<T>(
@@ -34,7 +34,7 @@ export class Retrier {
           throw error;
         }
 
-        await this.waitBeforeNextAttempt();
+        await this.waitBeforeNextAttempt(signal);
       }
     }
   }
