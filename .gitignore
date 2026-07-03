@@ -1,0 +1,11 @@
+/node_modules/
+.DS_Store
+.vscode/
+/dist/
+/tests/coverage/
+.npmrc
+
+# VitePress
+/docs/.vitepress/cache
+/docs/.vitepress/dist
+/docs/.vitepress/.temp

@@ -1,0 +1,73 @@
+{
+  "name": "@haskou/flow",
+  "version": "0.1.0",
+  "description": "Small TypeScript flow-control primitives for queues, semaphores, schedulers, rate limits, debouncing, throttling, and circuit breakers.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "keywords": [
+    "flow-control",
+    "semaphore",
+    "queue",
+    "rate-limiter",
+    "scheduler",
+    "debounce",
+    "throttle",
+    "circuit-breaker",
+    "typescript"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/haskou/flow.git"
+  },
+  "bugs": {
+    "url": "https://github.com/haskou/flow/issues"
+  },
+  "homepage": "https://github.com/haskou/flow#readme",
+  "scripts": {
+    "lint": "eslint ./src --ext .ts",
+    "lint:fix": "eslint ./src --ext .ts --fix",
+    "test": "yarn lint && yarn test:unit",
+    "test:unit": "jest --runInBand",
+    "test:coverage": "NODE_ENV=test jest --collect-coverage",
+    "build": "rm -rf dist/ && tsc",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress build docs && vitepress preview docs"
+  },
+  "dependencies": {
+    "@haskou/value-objects": "^2.13.1",
+    "tslib": "^2.8.1"
+  },
+  "devDependencies": {
+    "@haskou/eslint-config": "^0.1.2",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^26.0.1",
+    "eslint": "^10.5.0",
+    "jest": "^30.4.2",
+    "jest-extended": "^7.0.0",
+    "prettier": "^3.8.4",
+    "ts-jest": "^29.4.11",
+    "typescript": "^6.0.3",
+    "vitepress": "^1.6.4",
+    "vue": "^3.5.39"
+  }
+}
