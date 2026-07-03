@@ -44,7 +44,7 @@ This class can throw:
 
 | Method | Description |
 | --- | --- |
-| `acquire()` | Resolves with a `SemaphorePermit` when a permit is available. Waits when all permits are in use. |
+| `acquire(signal?)` | Resolves with a `SemaphorePermit` when a permit is available. Waits when all permits are in use. |
 | `tryAcquire()` | Returns a `SemaphorePermit` immediately, or `null` when no permit is available. |
 | `runExclusive(task)` | Acquires one permit, runs `task`, and releases the permit in a `finally` block. |
 | `run(task)` | Alias for `runExclusive(task)` used by `FlowPipeline`. |
@@ -81,6 +81,19 @@ try {
 ```
 
 Releasing the same permit twice throws `SemaphoreReleasedError`.
+
+## Aborting a waiter
+
+```typescript
+const controller = new AbortController();
+const permitPromise = semaphore.acquire(controller.signal);
+
+controller.abort();
+
+await permitPromise; // rejects with FlowAbortedError
+```
+
+Aborted waiters are removed from the semaphore queue.
 
 ## Pipeline usage
 

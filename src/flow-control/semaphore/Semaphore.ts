@@ -1,11 +1,13 @@
+import { FlowAbortedError } from '../../errors/FlowAbortedError';
 import { InvalidSemaphorePermitsError } from '../../errors/InvalidSemaphorePermitsError';
 import { SemaphoreCapacity } from '../value-objects/SemaphoreCapacity';
 import { SemaphorePermits } from '../value-objects/SemaphorePermits';
 import { SemaphorePermit } from './SemaphorePermit';
+import { SemaphoreWaiter } from './SemaphoreWaiter';
 
 export class Semaphore {
   private readonly capacity: SemaphoreCapacity;
-  private readonly waiters: Array<(permit: SemaphorePermit) => void> = [];
+  private waiters: SemaphoreWaiter[] = [];
   private availablePermits: SemaphorePermits;
 
   public constructor(permits: number | SemaphoreCapacity) {
@@ -30,7 +32,13 @@ export class Semaphore {
       return;
     }
 
-    waiter(new SemaphorePermit(() => this.releasePermit()));
+    waiter.grant(new SemaphorePermit(() => this.releasePermit()));
+  }
+
+  private removeWaiter(waiter: SemaphoreWaiter): void {
+    this.waiters = this.waiters.filter(
+      (queuedWaiter) => queuedWaiter !== waiter,
+    );
   }
 
   public getCapacity(): number {
@@ -45,15 +53,25 @@ export class Semaphore {
     return this.waiters.length;
   }
 
-  public acquire(): Promise<SemaphorePermit> {
+  public acquire(
+    signal: AbortSignal = new AbortController().signal,
+  ): Promise<SemaphorePermit> {
+    if (signal.aborted) {
+      return Promise.reject(new FlowAbortedError());
+    }
+
     const permit = this.tryAcquire();
 
     if (permit) {
       return Promise.resolve(permit);
     }
 
-    return new Promise((resolve) => {
-      this.waiters.push(resolve);
+    return new Promise((resolve, reject) => {
+      const waiter = new SemaphoreWaiter(resolve, reject);
+      waiter.watchAbort(signal, () => {
+        this.removeWaiter(waiter);
+      });
+      this.waiters.push(waiter);
     });
   }
 

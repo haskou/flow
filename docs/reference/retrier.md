@@ -27,6 +27,7 @@ constructor(options = new RetryOptions())
 
 - `InvalidRetryAttemptsError`
 - `InvalidRetryDelayError`
+- `FlowAbortedError` when aborted while waiting between attempts
 - the last error thrown by the task
 
 ## Methods

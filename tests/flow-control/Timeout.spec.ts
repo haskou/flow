@@ -1,4 +1,6 @@
 import {
+  FlowAbortedError,
+  FlowTask,
   InvalidTimeoutDurationError,
   Timeout,
   TimeoutDuration,
@@ -10,6 +12,13 @@ describe(Timeout.name, () => {
     const timeout = new Timeout(new TimeoutDuration(50));
 
     await expect(timeout.run(() => 'value')).resolves.toBe('value');
+  });
+
+  it('accepts a flow task instance', async () => {
+    const timeout = new Timeout(new TimeoutDuration(50));
+    const task = new FlowTask(() => 'value');
+
+    await expect(timeout.run(task)).resolves.toBe('value');
   });
 
   it('rejects and aborts when the timeout elapses', async () => {
@@ -46,7 +55,18 @@ describe(Timeout.name, () => {
 
     controller.abort();
 
-    await expect(promise).rejects.toThrow('parent aborted');
+    await expect(promise).rejects.toThrow(FlowAbortedError);
+  });
+
+  it('rejects when the parent signal is already aborted', async () => {
+    const timeout = new Timeout(50);
+    const controller = new AbortController();
+
+    controller.abort();
+
+    await expect(timeout.run(() => 'value', controller.signal)).rejects.toThrow(
+      FlowAbortedError,
+    );
   });
 
   it('rejects invalid durations', () => {

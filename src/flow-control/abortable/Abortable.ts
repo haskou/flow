@@ -21,12 +21,22 @@ export class Abortable {
       return Promise.reject(new FlowAbortedError());
     }
 
-    const aborted = new Promise<T>((_, reject) => {
-      this.controller.signal.addEventListener('abort', () => {
+    return new Promise<T>((resolve, reject) => {
+      const abort = (): void => {
+        this.controller.signal.removeEventListener('abort', abort);
         reject(new FlowAbortedError());
-      });
-    });
+      };
+      const cleanup = (): void => {
+        this.controller.signal.removeEventListener('abort', abort);
+      };
 
-    return Promise.race([flowTask.run(this.controller.signal), aborted]);
+      this.controller.signal.addEventListener('abort', abort);
+
+      flowTask
+        .run(this.controller.signal)
+        .then(resolve)
+        .catch(reject)
+        .finally(cleanup);
+    });
   }
 }

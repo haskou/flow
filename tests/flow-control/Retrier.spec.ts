@@ -1,4 +1,5 @@
 import {
+  FlowAbortedError,
   InvalidRetryAttemptsError,
   InvalidRetryDelayError,
   Retrier,
@@ -52,6 +53,18 @@ describe(Retrier.name, () => {
         return 'waited';
       }),
     ).resolves.toBe('waited');
+  });
+
+  it('can be aborted while waiting between attempts', async () => {
+    const retrier = new Retrier(new RetryOptions(2, 20));
+    const controller = new AbortController();
+    const promise = retrier.run(() => {
+      throw new Error('temporary');
+    }, controller.signal);
+
+    controller.abort();
+
+    await expect(promise).rejects.toThrow(FlowAbortedError);
   });
 
   it('uses default options', async () => {

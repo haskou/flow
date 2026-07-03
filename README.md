@@ -1,7 +1,7 @@
 # @haskou/flow
 
-[![CI](https://github.com/haskou/flow/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/haskou/flow/actions/workflows/ci.yml?query=branch%3Amaster)
-[![codecov](https://codecov.io/gh/haskou/flow/branch/master/graph/badge.svg)](https://codecov.io/gh/haskou/flow)
+[![CI](https://github.com/haskou/flow/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/haskou/flow/actions/workflows/ci.yml?query=branch%3Amain)
+[![codecov](https://codecov.io/gh/haskou/flow/branch/main/graph/badge.svg)](https://codecov.io/gh/haskou/flow)
 [![npm version](https://img.shields.io/npm/v/@haskou/flow.svg)](https://www.npmjs.com/package/@haskou/flow)
 [![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen?logo=renovatebot)](https://docs.renovatebot.com/)
 [![license](https://img.shields.io/npm/l/@haskou/flow.svg)](LICENSE.txt)

@@ -1,5 +1,7 @@
 import { Duration } from '@haskou/value-objects';
 
+import { TimerDelayWaiter } from './TimerDelayWaiter';
+
 export class TimerDelay {
   public constructor(private readonly duration: Duration) {}
 
@@ -7,14 +9,10 @@ export class TimerDelay {
     return this.duration.isZero();
   }
 
-  public wait(): Promise<void> {
-    if (this.isZero()) {
-      return Promise.resolve();
-    }
-
-    return new Promise((resolve) => {
-      this.setTimeout(resolve);
-    });
+  public wait(
+    signal: AbortSignal = new AbortController().signal,
+  ): Promise<void> {
+    return new TimerDelayWaiter(this, signal).wait();
   }
 
   public setTimeout(callback: () => void): NodeJS.Timeout {
