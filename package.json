@@ -1,6 +1,6 @@
 {
   "name": "@haskou/flow",
-  "version": "0.1.2",
+  "version": "1.0.0",
   "description": "TypeScript classes for controlling how async tasks and promises run.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
