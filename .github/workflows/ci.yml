@@ -65,15 +65,12 @@ jobs:
         github.event.pull_request.base.ref == 'main'
       ) &&
       (
-        startsWith(github.event.pull_request.title, 'fix:') ||
-        startsWith(github.event.pull_request.title, 'fix(') ||
-        startsWith(github.event.pull_request.title, 'fix!:') ||
-        startsWith(github.event.pull_request.title, 'feat:') ||
-        startsWith(github.event.pull_request.title, 'feat(') ||
-        startsWith(github.event.pull_request.title, 'feat!:') ||
-        startsWith(github.event.pull_request.title, 'break:') ||
-        startsWith(github.event.pull_request.title, 'break(') ||
-        startsWith(github.event.pull_request.title, 'break!:')
+        github.event.pull_request.head.ref == 'feat' ||
+        startsWith(github.event.pull_request.head.ref, 'feat/') ||
+        github.event.pull_request.head.ref == 'fix' ||
+        startsWith(github.event.pull_request.head.ref, 'fix/') ||
+        github.event.pull_request.head.ref == 'break' ||
+        startsWith(github.event.pull_request.head.ref, 'break/')
       )
 
     steps:
@@ -106,24 +103,26 @@ jobs:
           package_name="$(node -p "require('./package.json').name")"
           current_version="$(node -p "require('./package.json').version")"
           published_version="$(npm view "$package_name" version 2>/dev/null || echo "0.0.0")"
-          pr_title="${PR_TITLE}"
+          branch_name="${HEAD_BRANCH}"
           release_marker="for #${PR_NUMBER}"
-          patch_title_regex='^fix(\([^)]*\))?!?:'
-          minor_title_regex='^feat(\([^)]*\))?!?:'
-          major_title_regex='^break(\([^)]*\))?!?:'
 
           echo "already_released=false" >> "$GITHUB_OUTPUT"
 
-          if [[ "$pr_title" =~ $patch_title_regex ]]; then
-            bump="patch"
-          elif [[ "$pr_title" =~ $minor_title_regex ]]; then
-            bump="minor"
-          elif [[ "$pr_title" =~ $major_title_regex ]]; then
-            bump="major"
-          else
-            echo "Unsupported release PR title: $pr_title"
-            exit 1
-          fi
+          case "$branch_name" in
+            fix|fix/*)
+              bump="patch"
+              ;;
+            feat|feat/*)
+              bump="minor"
+              ;;
+            break|break/*)
+              bump="major"
+              ;;
+            *)
+              echo "Unsupported release branch: $branch_name"
+              exit 1
+              ;;
+          esac
 
           release_subject="$(git log --format=%s --grep="$release_marker" -n 1 HEAD || true)"
 
@@ -207,7 +206,6 @@ jobs:
         env:
           HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
 
       - name: Publish package
         if: >-
