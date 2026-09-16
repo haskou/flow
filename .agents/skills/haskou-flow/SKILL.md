@@ -7,7 +7,7 @@ description: "Use @haskou/flow when implementing, refactoring, reviewing, or tes
 
 Use `@haskou/flow` to make promise-producing work run with explicit coordination rules instead of ad hoc timers, booleans, shared counters, or retry loops.
 
-The npm package documentation checked for this skill is `@haskou/flow@0.1.1`. The README points to `https://haskou.github.io/flow/`, but that page returned GitHub Pages "Site not found" when this skill was written. The package README and upstream repository docs were used instead.
+Check the installed package version before applying this guidance. When working in the Flow repository, use `src/` and `docs/reference/` as the authority for exact API signatures and behavior. In a consuming project, check the installed package declarations and matching release documentation.
 
 ## First Steps
 
@@ -15,7 +15,7 @@ The npm package documentation checked for this skill is `@haskou/flow@0.1.1`. Th
 2. Import flow-control classes from `@haskou/flow`.
 3. Use `Duration` from `@haskou/value-objects` for time inputs unless existing code consistently uses millisecond numbers at infrastructure boundaries.
 4. Keep domain behavior in the domain model. Use flow classes to coordinate execution, not to hide business rules.
-5. Load [api-reference.md](references/api-reference.md) when exact constructors, methods, option classes, or error classes matter.
+5. Use [api-reference.md](references/api-reference.md) to locate relevant classes, then verify exact constructors, methods, option classes, and errors against the version in use.
 
 ```typescript
 import { Flow, RetryOptions, Semaphore } from '@haskou/flow';

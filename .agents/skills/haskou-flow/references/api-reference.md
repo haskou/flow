@@ -1,6 +1,6 @@
 # @haskou/flow API Reference
 
-This reference summarizes the package README and upstream repository docs for `@haskou/flow@0.1.1`.
+This reference is a navigation aid for the Flow API. Verify signatures and behavior against the version in use: `src/` and `docs/reference/` in the Flow repository, or installed package declarations and matching release documentation in a consuming project.
 
 ## Installation
 
