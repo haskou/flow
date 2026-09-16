@@ -83,7 +83,7 @@ describe('flow-control value objects', () => {
     ).toBe(true);
     expect(() => new Debouncer(debounceDelay)).not.toThrow();
     expect(() => new Throttler(throttleInterval)).not.toThrow();
-    expect(debounceDelay.isEqual(Duration.fromMilliseconds(10))).toBe(true);
+    expect(debounceDelay.hasValue(Duration.fromMilliseconds(10))).toBe(true);
   });
 
   it('uses semaphore capacity as a value object', () => {
