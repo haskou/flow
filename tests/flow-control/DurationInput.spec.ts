@@ -24,7 +24,7 @@ describe('Duration input', () => {
       () => undefined,
     );
 
-    expect(options.getInterval().isEqual(Duration.fromMilliseconds(1))).toBe(
+    expect(options.getInterval().hasValue(Duration.fromMilliseconds(1))).toBe(
       true,
     );
   });
@@ -48,7 +48,7 @@ describe('Duration input', () => {
     );
 
     expect(
-      options.getRecoveryTimeout().isEqual(Duration.fromMilliseconds(1)),
+      options.getRecoveryTimeout().hasValue(Duration.fromMilliseconds(1)),
     ).toBe(true);
   });
 });

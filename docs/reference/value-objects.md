@@ -116,6 +116,25 @@ These classes are exported because they are part of the package surface, but mos
 
 ## Notes
 
+### Migrating from Flow 2.x
+
+Flow 3.x uses `@haskou/value-objects` 7.x. Update direct dependencies on
+`@haskou/value-objects` to a compatible 7.x version and ensure that Flow and the
+application resolve the same package instance. A `Duration` from a separate
+installation is not recognized by Flow's `instanceof Duration` input checks.
+Passing numeric milliseconds remains supported.
+
+`isEqual()` now requires the same concrete Value Object type as well as the same
+value. Use `hasValue()` when deliberately comparing duration values across types:
+
+```typescript
+const timeout = new TimeoutDuration(Duration.fromSeconds(3));
+
+timeout.isEqual(new TimeoutDuration(Duration.fromSeconds(3))); // true
+timeout.isEqual(Duration.fromSeconds(3)); // false
+timeout.hasValue(Duration.fromSeconds(3)); // true
+```
+
 - Prefer numbers for simple call sites: `new Timeout(3000)` is fine.
 - Prefer `Duration` when readability matters: `new Timeout(Duration.fromSeconds(3))`.
 - Prefer explicit configuration values when values are shared, named, or built outside the constructor call.
