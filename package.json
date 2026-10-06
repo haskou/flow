@@ -51,7 +51,7 @@
     "docs:preview": "vitepress build docs && vitepress preview docs"
   },
   "dependencies": {
-    "@haskou/value-objects": "^8.3.3"
+    "@haskou/value-objects": "^8.3.4"
   },
   "devDependencies": {
     "@haskou/eslint-config": "^0.2.2",
