@@ -56,7 +56,7 @@
   "devDependencies": {
     "@haskou/eslint-config": "^0.2.2",
     "@types/jest": "^30.0.0",
-    "@types/node": "^26.6.4",
+    "@types/node": "^26.6.5",
     "eslint": "^10.12.0",
     "jest": "^30.5.2",
     "jest-extended": "^7.0.0",
